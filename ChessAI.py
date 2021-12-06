@@ -102,13 +102,6 @@ def findBestMove(gs, validMoves):
             bestPlayerMove = playerMove
         gs.undoMove()
     return bestPlayerMove
-
-def findBestMoveMinMax(gs, validMoves):
-    global nextMove
-    nextMove = None
-    findMoveMinMax(gs, validMoves, DEPTH, gs.whiteToMove)
-    return nextMove
-
 def findMoveMinMax(gs, validMoves, depth, whiteToMove):
     global nextMove
     if depth == 0:
@@ -139,7 +132,36 @@ def findMoveMinMax(gs, validMoves, depth, whiteToMove):
                     nextMove = move
             gs.undoMove()
         return minScore
-'''
+
+
+def findBest(gs, validMoves):
+    global nextMove
+    nextMove = None
+    random.shuffle(validMoves)
+    findMoveNegaMaxAlphaBeta(gs, validMoves, DEPTH, -CHECKMATE, CHECKMATE, 1 if gs.whiteToMove else -1)
+    return nextMove
+
+def findMoveNegaMaxAlphaBeta(gs, validMoves, depth,alpha, beta, turnMultiplier):
+    global nextMove
+    if depth == 0:
+            return turnMultiplier * scoreBoard(gs)
+    maxScore = -CHECKMATE
+    for move in validMoves:
+        gs.makeMove(move)
+        nextMoves = gs.getValidMoves()
+        score = -findMoveNegaMaxAlphaBeta(gs, nextMoves, depth - 1,-beta, -alpha, -turnMultiplier)
+        if score > maxScore:
+            maxScore = score
+            if depth == DEPTH:
+                nextMove = move
+        gs.undoMove()
+        if maxScore > alpha: #pruning here
+            alpha = maxScore
+        if alpha >= beta:
+            break
+
+    return maxScore
+''':
 >0 score -> good for white
 <0 score -> good for black
 '''
